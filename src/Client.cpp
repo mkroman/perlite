@@ -71,10 +71,10 @@ void Client::processCommand(Command* command) {
 				m_network->addChannel(channel);
 			}
 
-			StringTable nicknames;
-			nicknames = splitNamesTable(command->getParam(3));
+			StringTable users;
+			users = splitNamesTable(command->getParam(3));
 
-			channel->merge(nicknames);
+			channel->merge(users);
 		}
 	}
 	else {
@@ -87,20 +87,20 @@ void Client::processCommand(Command* command) {
 	}
 }
 
-// FIXME: Utilize C++ strings.
 const StringTable Client::splitNamesTable(const string& names) {
-	char* ptr;
-	StringTable stringTable;
+	size_t start = 0, end = 0;
+	StringTable table;
 
-	ptr = strtok(const_cast<char*>(names.c_str()), " ");
+	end = names.find(' ');
 
-	while (ptr != NULL) {
-		stringTable.push_back(string(ptr));
+	while (end != string::npos) {
+		table.push_back(names.substr(start, end - start + 1));
+		start = end + 1;
 
-		ptr = strtok(NULL, " ");
+		end = names.find(' ', start);
 	}
 
-	return stringTable;
+	return table;
 }
 
 } // namespace perlite

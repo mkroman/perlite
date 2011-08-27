@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <string.h>
 
 #include "Perlite.hpp"
 #include "Network.hpp"
