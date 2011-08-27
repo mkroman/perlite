@@ -10,7 +10,8 @@ namespace perlite {
 
 class Channel {
 public:
-	Channel(const std::string& name);
+	Channel(const std::string& name) : m_name(name) {};
+	~Channel();
 
 public:
 	// Iterates through a StringTable and create an instance for each

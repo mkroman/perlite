@@ -17,14 +17,20 @@ using namespace std;
 
 namespace perlite {
 
-Network::Network(void) {
-	// …
+// Destroy every channel joined on this network and close the socket connection.
+Network::~Network() {
+	ChannelTable::iterator it;
+
+	// Iterate over every channel instance and wipe it from memory.
+	for (it = m_channels.begin(); it < m_channels.end(); it++)
+		delete *it;
+
+	if (m_socket)
+		::close(m_socket);
 }
 
-Network::~Network(void) {
-	// …
-}
-
+// Establish a basic blocking IPv4 TCP connection.
+// Returns true on success, otherwise false.
 bool Network::connect(const string& host, int port) {
 	m_host = host;
 	m_port = port;
@@ -53,11 +59,10 @@ bool Network::connect(const string& host, int port) {
 	remote_addr.sin_family = AF_INET;
 	remote_addr.sin_port = htons(port);
 
-	memcpy(&remote_addr.sin_addr, remote_host->h_addr,
-			remote_host->h_length);
+	memcpy(&remote_addr.sin_addr, remote_host->h_addr, remote_host->h_length);
 
 	if (::connect(m_socket, (struct sockaddr*)&remote_addr,
-				sizeof(struct sockaddr)) == -1) {
+			sizeof(struct sockaddr)) == -1) {
 		cerr << "::connect() failed" << endl;
 
 		return false;

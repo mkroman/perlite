@@ -6,29 +6,29 @@
 #include <string.h>
 
 #include "Perlite.hpp"
+#include "Network.hpp"
 
 namespace perlite {
 
 // <Forward declaration>
-class Network;
 class Command;
 // </Forward declaration>
 
 class Client {
-	public:
-		Client(void);
-		~Client(void);
+public:
+	Client() : m_network(new Network()) {};
+	~Client() {	delete m_network; }
 
-	public:
-		bool connect(const std::string& host, int port);
-		void runLoop(void);
-		
-		void processCommand(Command* command);
+public:
+	bool connect(const std::string& host, int port);
+	void runLoop();
+	
+	void processCommand(Command* command);
 
-	protected:
-		const StringTable splitNamesTable(const std::string& names);
+protected:
+	const StringTable splitNamesTable(const std::string& names);
 
-		Network* m_network;
+	Network* m_network;
 };
 
 } // namespace perlite

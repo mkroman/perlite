@@ -4,10 +4,18 @@ using namespace std;
 
 namespace perlite {
 
-Channel::Channel(const string& name) : m_name(name) {
-	// …
+// Destroy every user in this channel.
+Channel::~Channel() {
+	UserTable::iterator it;
+
+	// Iterate over every user in the channel and wipe them from memory.
+	for (it = m_users.begin(); it < m_users.end(); it++)
+		delete *it;
 }
 
+// Merge the current user table with a string containing nicks split by spaces.
+// The nicks are prefixed with their flags (+/@/%/~), no host- or username is
+// available at this point.
 void Channel::merge(StringTable& names) {
 	User* user;
 	StringTable::iterator it;
@@ -23,6 +31,7 @@ void Channel::merge(StringTable& names) {
 	}
 }
 
+// Search for a user with a specific nickname.
 User* Channel::getUserByNick(const string& nick) {
 	UserTable::iterator it;
 

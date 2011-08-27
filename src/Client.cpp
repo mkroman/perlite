@@ -8,14 +8,6 @@ using namespace std;
 
 namespace perlite {
 
-Client::Client(void) : m_network(new Network()) {
-	// …
-}
-
-Client::~Client(void) {
-	delete m_network;
-}
-
 bool Client::connect(const std::string& host, int port) {
 	if (m_network->connect(host, port)) {
 		int size;
@@ -41,7 +33,7 @@ bool Client::connect(const std::string& host, int port) {
 	return true;
 }
 
-void Client::runLoop(void) {
+void Client::runLoop() {
 	Command* command;
 	std::string line;
 
