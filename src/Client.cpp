@@ -63,9 +63,11 @@ void Client::handleCommand(Command* command) {
 	}
 	else {
 		if (command->getName() == "PING") {
-			std::string response = command->getParam(0);
-
-			network_->sendCommand("PONG :%s", "hej");
+			network_->sendCommand("PONG :%s", command->getParam(0).c_str());
+		}
+		else if (command->getName() == "PRIVMSG") {
+			if (command->getParam(1) == "!test")
+				network_->sendCommand("PRIVMSG %s :slik et beskidt askebæger", command->getParam(0).c_str());
 		}
 	}
 }

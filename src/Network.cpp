@@ -65,23 +65,25 @@ bool Network::connect(const string& host, int port) {
 	return true;
 }
 
-size_t Network::readLine(std::string& buffer) {
-	char   buf[MIN_BUFFER_SIZE], tmp;
+size_t Network::readLine(std::string& destination) {
+	char   buffer[MIN_BUFFER_SIZE], tmp;
 	size_t size = 0, read = 0, i = 0;
 
-	for (i = 0; i < sizeof(buf); i++) {
+	for (i = 0; i < sizeof(buffer); i++) {
 		read = ::recv(socket_, &tmp, sizeof(char), 0);
 
-		if (tmp != '\n')
-			buf[i] = tmp;
-		else
+		if (tmp == '\r')
+			continue;
+		else if (tmp == '\n')
 			break;
+
+		buffer[i] = tmp;
 
 		size += read;
 	}
 
-	buf[size] = '\0';
-	buffer = std::string(buf);
+	buffer[size] = '\0';
+	destination = std::string(buffer);
 
 	return size;
 }
