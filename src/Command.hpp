@@ -27,14 +27,25 @@ namespace Perlite {
 			return prefix_;
 		}
 
+		signed int getCode() {
+			return code_;
+		}
+
+		bool isNumeric() {
+			return numeric_;
+		}
+
 	protected:
-		Command(char* prefix, char* command, char* params[], size_t params_count);
+		Command(char* prefix, int code, char* params[], size_t count);
+		Command(char* prefix, char* command, char* params[], size_t count);
 		~Command(void);
 
 	private:
+		signed int  code_;
 		std::string name_;
 		std::string prefix_;
 		ParamList   params_;
+		bool        numeric_;
 	};
 }
 

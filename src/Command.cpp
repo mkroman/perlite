@@ -5,12 +5,14 @@
 
 #include "Command.hpp"
 
+using namespace std;
+
 namespace Perlite {
 
 Command* Command::parse(const std::string& line) {
 	int    code = 0, index = 0;
 	char*  sptr, *ptr, buffer[MIN_BUFFER_SIZE];
-	char*  prefix, *command, *params[MAX_PARAMS_LENGTH];
+	char*  prefix = NULL, *name = NULL, *params[MAX_PARAMS_LENGTH];
 
 	ptr = sptr = buffer;
 	memset(params, 0, sizeof(params));
@@ -38,7 +40,7 @@ Command* Command::parse(const std::string& line) {
 
 		*ptr++ = '\0';
 
-		command = sptr;
+		name = sptr;
 	}
 
 	// Parse parameters
@@ -57,24 +59,37 @@ Command* Command::parse(const std::string& line) {
 		}
 	}
 
-	Command* instance = NULL;
+	Command* command = NULL;
 
-	if (command)
-		instance = new Command(prefix, command, params, index);
+	if (name)
+		command = new Command(prefix, name, params, index);
+	else
+		command = new Command(prefix, code, params, index);
 
-	return instance;
+	return command;
 }
 
-Command::Command(char* prefix, char* command, char* params[], size_t params_count) :
-	name_(std::string(command)),
-	prefix_(std::string(prefix)) {
+Command::Command(char* prefix, int code, char* params[], size_t count) :
+	code_(code), numeric_(true) {
+
+	if (prefix)
+		prefix_ = string(prefix);
 	
-	for (unsigned int i = 0; i < params_count; i++)
-		params_.push_back(std::string(params[i]));
+	for (unsigned int i = 0; i < count; i++)
+		params_.push_back(string(params[i]));
+}
+
+Command::Command(char* prefix, char* command, char* params[], size_t count) :
+	name_(string(command)), numeric_(false) {
+
+	if (prefix)
+		prefix_ = string(prefix);
+	
+	for (unsigned int i = 0; i < count; i++)
+		params_.push_back(string(params[i]));
 }
 
 Command::~Command(void) {
-	
 }
 
 }

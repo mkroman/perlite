@@ -17,7 +17,12 @@ Client::~Client(void) {
 }
 
 bool Client::connect(const std::string& host, int port) {
-	return network_->connect(host, port);
+	if (network_->connect(host, port)) {
+		size_t result;
+
+		result = network_->sendCommand("NICK :%s\r\n", "mynick");
+		result = network_->sendCommand("USER %s unknown unknown :%s\r\n", "myuser", "myrealname");
+	}
 }
 
 void Client::loop(void) {
@@ -27,9 +32,14 @@ void Client::loop(void) {
 	while (network_->readLine(buffer)) {
 		command = Command::parse(buffer);
 
-		if (command) {
-			cout << "name: " << command->getName() << " prefix: " << command->getPrefix() << endl;	
+		if (!command->isNumeric()) {
+			cout << "name: " << command->getName() << " prefix: " << command->getPrefix() << endl;
 		}
+		else {
+			cout << "code: " << command->getCode() << " prefix: " << command->getPrefix() << endl;
+		}
+
+		cout << buffer << endl;
 	}
 }
 
