@@ -4,6 +4,7 @@
 
 namespace Perlite {
 class Network;
+class Command;
 
 class Client {
 	public:
@@ -12,6 +13,7 @@ class Client {
 
 	public:
 		bool connect(const std::string& host, int port);
+		void handleCommand(Command* command);
 		void loop(void);
 
 	private:

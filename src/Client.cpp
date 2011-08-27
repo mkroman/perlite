@@ -3,6 +3,7 @@
 #include "Client.hpp"
 #include "Command.hpp"
 #include "Network.hpp"
+#include "Constants.hpp"
 
 using namespace std;
 
@@ -20,9 +21,24 @@ bool Client::connect(const std::string& host, int port) {
 	if (network_->connect(host, port)) {
 		size_t result;
 
-		result = network_->sendCommand("NICK :%s\r\n", "mynick");
-		result = network_->sendCommand("USER %s unknown unknown :%s\r\n", "myuser", "myrealname");
+		result = network_->sendCommand("NICK :%s", "mynick");
+
+		if (result == (size_t)-1) {
+			cerr << "Could not send initial NICK command." << endl;
+
+			return false;
+		}
+
+		result = network_->sendCommand("USER %s unknown unknown :%s", "myuser", "myrealname");
+
+		if (result == (size_t)-1) {
+			cerr << "Could not send initial USER command." << endl;
+
+			return false;
+		}
 	}
+
+	return true;
 }
 
 void Client::loop(void) {
@@ -32,14 +48,25 @@ void Client::loop(void) {
 	while (network_->readLine(buffer)) {
 		command = Command::parse(buffer);
 
-		if (!command->isNumeric()) {
-			cout << "name: " << command->getName() << " prefix: " << command->getPrefix() << endl;
-		}
-		else {
-			cout << "code: " << command->getCode() << " prefix: " << command->getPrefix() << endl;
-		}
+		if (command)
+			handleCommand(command);
 
 		cout << buffer << endl;
+	}
+}
+
+void Client::handleCommand(Command* command) {
+	if (command->isNumeric()) {
+		if (command->getCode() == 422 || command->getCode() == 376) {
+			network_->sendCommand("JOIN %s", "#uplink");
+		}
+	}
+	else {
+		if (command->getName() == "PING") {
+			std::string response = command->getParam(0);
+
+			network_->sendCommand("PONG :%s", "hej");
+		}
 	}
 }
 

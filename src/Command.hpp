@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 
-#define MIN_BUFFER_SIZE 512
 #define MAX_PARAMS_LENGTH 10
 
 typedef std::vector<std::string> ParamList;
@@ -17,6 +16,10 @@ namespace Perlite {
 	public:
 		ParamList& getParameters() {
 			return params_;
+		}
+
+		std::string getParam(ParamList::size_type index) {
+			return params_.at(index);
 		}
 
 		std::string& getName() {

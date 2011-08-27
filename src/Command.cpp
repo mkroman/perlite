@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "Command.hpp"
+#include "Constants.hpp"
 
 using namespace std;
 

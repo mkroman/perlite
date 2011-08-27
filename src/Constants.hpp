@@ -1,0 +1,6 @@
+#ifndef __PERLITE_CONSTANTS_H_
+#define __PERLITE_CONSTANTS_H_
+
+#define MIN_BUFFER_SIZE 512
+
+#endif
