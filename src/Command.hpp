@@ -24,8 +24,11 @@ public:
 	// </Getters>
 
 protected:
-	Command(char* prefix, int code, char* params[], size_t count);
-	Command(char* prefix, char* name, char* params[], size_t count);
+	Command(signed int code, std::string prefix, ParamTable params) :
+		m_code(code), m_prefix(prefix), m_params(params) {};
+
+	Command(std::string name, std::string prefix, ParamTable params) :
+		m_name(name), m_prefix(prefix), m_params(params) {};
 
 private:
 	signed int  m_code;

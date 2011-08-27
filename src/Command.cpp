@@ -4,86 +4,59 @@ using namespace std;
 
 namespace perlite {
 
-Command* Command::parseLine(const std::string& line) {
-	int    code = 0, index = 0;
-	char*  sptr, *ptr, buffer[MIN_BUFFER_SIZE];
-	char*  prefix = NULL, *name = NULL, *params[MAX_PARAMS_COUNT];
-	Command* command = 0;
+Command* Command::parseLine(const string& line) {
+	Command* command;
+	vector<string> params;
+	size_t index = 0, code = 0;
+	string prefix, name, buffer;
 
-	ptr = sptr = buffer;
-	
-	memset(params, 0, sizeof(params));
-	strcpy(buffer, line.c_str());
+	buffer = line;
 
 	// Parse prefix
-	if (buffer[0] == ':') {
-		while (*ptr && *ptr != ' ')
-			ptr++;
+	if (line[0] == ':') {
+		index = buffer.find(' ', 0);
 
-		*ptr++ = '\0';
-
-		prefix = buffer + 1; // Skip :
+		if (index != string::npos)
+			prefix = slicestr(buffer, 1, index);
 	}
 
-	// Parse command/code
-	if (isdigit(ptr[0]) && isdigit(ptr[1]) && isdigit(ptr[2])) {
-		ptr[3] = '\0';
-		code = atoi(ptr);
-		ptr += 4;
+	// Parse command
+	if (isdigit(buffer[0]) && isdigit(buffer[1]) && isdigit(buffer[2])) {
+		code = strtoi(slicestr(buffer, 0, 3));
 	}
 	else {
-		for (sptr = ptr; *ptr && *ptr != ' '; ptr++)
-			;
+		index = buffer.find(' ', 0);
 
-		*ptr++ = '\0';
-
-		name = sptr;
+		if (index != string::npos)
+			name = slicestr(buffer, 0, index);
 	}
 
 	// Parse parameters
-	while (*ptr && index < MAX_PARAMS_COUNT) {
-		if (*ptr == ':') { // last param
-			params[index++] = ptr + 1;
+	while (params.size() < MAX_PARAM_COUNT && !buffer.empty()) {
+		if (buffer[0] == ':') {
+			params.push_back(buffer.substr(1));
 			break;
 		}
 		else {
-			for (sptr = ptr; *ptr && *ptr != ' '; ptr++)
-				;
-			params[index++] = sptr;
+			index = buffer.find(' ', 0);
 
-			if (*ptr)
-				*ptr++ = '\0';
+			if (index == string::npos) {
+				params.push_back(slicestr(buffer, 0, index, 0));
+			}
+			else {
+				params.push_back(slicestr(buffer, 0, index, 1));
+			}
 		}
 	}
 
-	if (name) {
-		command = new Command(prefix, name, params, index);
-		return command;
+	if (!name.empty()) {
+		command = new Command(name, prefix, params);
 	}
 	else {
-		command = new Command(prefix, code, params, index);
-		return command;
+		command = new Command(code, prefix, params);
 	}
-}
 
-Command::Command(char* prefix, int code, char* params[], size_t count) :
-	m_code(code) {
-
-	if (prefix)
-		m_prefix = string(prefix);
-	
-	for (unsigned int i = 0; i < count; i++)
-		m_params.push_back(string(params[i]));
-}
-
-Command::Command(char* prefix, char* name, char* params[], size_t count) :
-	m_code(0), m_name(string(name)) {
-
-	if (prefix)
-		m_prefix = string(prefix);
-	
-	for (unsigned int i = 0; i < count; i++)
-		m_params.push_back(string(params[i]));
+	return command;
 }
 
 } // namespace perlite
