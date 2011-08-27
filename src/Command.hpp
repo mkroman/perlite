@@ -5,9 +5,10 @@
 
 #define MAX_PARAMS_LENGTH 10
 
-typedef std::vector<std::string> ParamList;
-
 namespace Perlite {
+	typedef std::string            Parameter;
+	typedef std::vector<Parameter> ParamList;
+	
 	class Command {
 	public:
 		static Command* parse(const std::string& line);
@@ -18,7 +19,7 @@ namespace Perlite {
 			return params_;
 		}
 
-		std::string getParam(ParamList::size_type index) {
+		Parameter& getParam(ParamList::size_type index) {
 			return params_.at(index);
 		}
 

@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "Network.hpp"
+#include "Channel.hpp"
 #include "Command.hpp"
 #include "Constants.hpp"
 
@@ -121,6 +122,23 @@ size_t Network::sendData(const char* data, size_t size) {
 		return (size_t)-1;
 	else
 		return result;
+}
+
+Channel* Network::getChannelByName(const std::string& name) {
+	ChannelList::iterator it;
+
+	for (it = channels_.begin(); it < channels_.end(); it++) {
+		if (((Channel*)*it)->getName() == name)
+			return *it;
+	}
+
+	return NULL;
+}
+
+size_t Network::addChannel(Channel* channel) {
+	channels_.push_back(channel);
+	
+	return channels_.size();
 }
 
 }
