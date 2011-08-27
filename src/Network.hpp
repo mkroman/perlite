@@ -3,9 +3,11 @@
 #include <vector>
 #include <string>
 
-namespace Perlite {
+#include "Perlite.hpp"
+
+namespace perlite {
+
 class Channel;
-typedef std::vector<Channel*> ChannelList;
 
 class Network {
 	public:
@@ -13,27 +15,27 @@ class Network {
 		~Network();
 
 	public:
-		bool     connect(const std::string& host, int port);
+		bool connect(const std::string& host, int port);
+		size_t sendData(const char* data, size_t size);
+		size_t sendCommand(const std::string& format, ...);
 
-		size_t   readLine(std::string& destination);
-
-		size_t   sendData(const char* data, size_t size);
-		size_t   sendCommand(const std::string& format, ...);
-
-		size_t   addChannel(Channel* channel);
+		// <Getters>
+		size_t readLine(std::string& destination);
 		Channel* getChannelByName(const std::string& name);
-		ChannelList& getChannels() {
-			return channels_;
-		}
+		const ChannelTable& getChannels() { return m_channels; }
+		// </Getters>
+
+		// <Setters>
+		size_t addChannel(Channel* channel);
+		// </Setters>
 
 	private:
-		std::string  host_;
-		unsigned int port_;
-
-		signed int   socket_;
-
-		ChannelList  channels_;
+		std::string  m_host;
+		unsigned int m_port;
+		signed int   m_socket;
+		ChannelTable m_channels;
 };
-}
+
+} // namespace perlite
 
 #endif

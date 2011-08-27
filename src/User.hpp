@@ -2,7 +2,8 @@
 #define __PERLITE_USER_H_
 #include <string>
 
-namespace Perlite {
+namespace perlite {
+
 class Channel;
 
 class User {
@@ -10,14 +11,13 @@ public:
 	User(const std::string& nick, Channel* channel);
 
 public:
-	std::string& getNick() {
-		return nick_;
-	}
+	const std::string& getNick() { return m_nick; }
 
 private:
-	std::string nick_;
-	Channel*    channel_;
+	std::string m_nick;
+	Channel*    m_channel;
 };
-}
+
+} // namespace perlite
 
 #endif

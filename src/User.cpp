@@ -1,13 +1,11 @@
-#include <string>
-
 #include "User.hpp"
 #include "Channel.hpp"
 
-namespace Perlite {
+namespace perlite {
 
 User::User(const std::string& nick, Channel* channel) : 
-	nick_(nick), channel_(channel) {
+	m_nick(nick), m_channel(channel) {
 	// …
 }
 
-}
+} // namespace perlite

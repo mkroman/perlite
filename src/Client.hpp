@@ -2,11 +2,17 @@
 #define __PERLITE_CLIENT_H_
 #include <string>
 #include <vector>
+#include <iostream>
 #include <string.h>
 
-namespace Perlite {
+#include "Perlite.hpp"
+
+namespace perlite {
+
+// <Forward declaration>
 class Network;
 class Command;
+// </Forward declaration>
 
 class Client {
 	public:
@@ -15,13 +21,16 @@ class Client {
 
 	public:
 		bool connect(const std::string& host, int port);
-		void handleCommand(Command* command);
-		void loop(void);
-		std::vector<std::string> splitNamesTable(const std::string& table);
+		void runLoop(void);
+		
+		void processCommand(Command* command);
 
-	private:
-		Network* network_;
+	protected:
+		const StringTable splitNamesTable(const std::string& names);
+
+		Network* m_network;
 };
-}
+
+} // namespace perlite
 
 #endif

@@ -2,55 +2,38 @@
 #define __PERLITE_COMMAND_H_
 #include <vector>
 #include <string>
+#include <string.h>
+#include <stdlib.h>
 
-#define MAX_PARAMS_LENGTH 10
+#include "Perlite.hpp"
 
-namespace Perlite {
-	typedef std::string            Parameter;
-	typedef std::vector<Parameter> ParamList;
-	
-	class Command {
-	public:
-		static Command* parse(const std::string& line);
+namespace perlite {
 
-	// Getters
-	public:
-		ParamList& getParameters() {
-			return params_;
-		}
+class Command {
+public:
+	static Command* parseLine(const std::string& line);
 
-		Parameter& getParam(ParamList::size_type index) {
-			return params_.at(index);
-		}
+public:
+	// <Getters>
+	bool isNumeric() { return (m_code != 0); }
+	signed int getCode() { return m_code; }
+	const std::string& getName() { return m_name; }
+	const std::string& getPrefix() { return m_prefix; }
+	const ParamTable& getParameters() { return m_params; }
+	const Parameter& getParam(size_t index) { return m_params.at(index); }
+	// </Getters>
 
-		std::string& getName() {
-			return name_;
-		}
+protected:
+	Command(char* prefix, int code, char* params[], size_t count);
+	Command(char* prefix, char* name, char* params[], size_t count);
 
-		std::string& getPrefix() {
-			return prefix_;
-		}
+private:
+	signed int  m_code;
+	std::string m_name;
+	std::string m_prefix;
+	ParamTable  m_params;
+};
 
-		signed int getCode() {
-			return code_;
-		}
-
-		bool isNumeric() {
-			return numeric_;
-		}
-
-	protected:
-		Command(char* prefix, int code, char* params[], size_t count);
-		Command(char* prefix, char* command, char* params[], size_t count);
-		~Command(void);
-
-	private:
-		signed int  code_;
-		std::string name_;
-		std::string prefix_;
-		ParamList   params_;
-		bool        numeric_;
-	};
-}
+} // namespace perlite
 
 #endif

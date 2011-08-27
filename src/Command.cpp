@@ -1,21 +1,17 @@
-#include <stdlib.h>
-#include <string>
-#include <string.h>
-#include <stdio.h>
-
 #include "Command.hpp"
-#include "Constants.hpp"
 
 using namespace std;
 
-namespace Perlite {
+namespace perlite {
 
-Command* Command::parse(const std::string& line) {
+Command* Command::parseLine(const std::string& line) {
 	int    code = 0, index = 0;
 	char*  sptr, *ptr, buffer[MIN_BUFFER_SIZE];
-	char*  prefix = NULL, *name = NULL, *params[MAX_PARAMS_LENGTH];
+	char*  prefix = NULL, *name = NULL, *params[MAX_PARAMS_COUNT];
+	Command* command = 0;
 
 	ptr = sptr = buffer;
+	
 	memset(params, 0, sizeof(params));
 	strcpy(buffer, line.c_str());
 
@@ -45,7 +41,7 @@ Command* Command::parse(const std::string& line) {
 	}
 
 	// Parse parameters
-	while (*ptr && index < MAX_PARAMS_LENGTH) {
+	while (*ptr && index < MAX_PARAMS_COUNT) {
 		if (*ptr == ':') { // last param
 			params[index++] = ptr + 1;
 			break;
@@ -60,37 +56,34 @@ Command* Command::parse(const std::string& line) {
 		}
 	}
 
-	Command* command = NULL;
-
-	if (name)
+	if (name) {
 		command = new Command(prefix, name, params, index);
-	else
+		return command;
+	}
+	else {
 		command = new Command(prefix, code, params, index);
-
-	return command;
+		return command;
+	}
 }
 
 Command::Command(char* prefix, int code, char* params[], size_t count) :
-	code_(code), numeric_(true) {
+	m_code(code) {
 
 	if (prefix)
-		prefix_ = string(prefix);
+		m_prefix = string(prefix);
 	
 	for (unsigned int i = 0; i < count; i++)
-		params_.push_back(string(params[i]));
+		m_params.push_back(string(params[i]));
 }
 
-Command::Command(char* prefix, char* command, char* params[], size_t count) :
-	name_(string(command)), numeric_(false) {
+Command::Command(char* prefix, char* name, char* params[], size_t count) :
+	m_code(0), m_name(string(name)) {
 
 	if (prefix)
-		prefix_ = string(prefix);
+		m_prefix = string(prefix);
 	
 	for (unsigned int i = 0; i < count; i++)
-		params_.push_back(string(params[i]));
+		m_params.push_back(string(params[i]));
 }
 
-Command::~Command(void) {
-}
-
-}
+} // namespace perlite

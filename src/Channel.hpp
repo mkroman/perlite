@@ -3,32 +3,35 @@
 #include <vector>
 #include <string>
 
+#include "Perlite.hpp"
 #include "User.hpp"
 
-namespace Perlite {
-typedef std::vector<User*> UserList;
+namespace perlite {
 
 class Channel {
 public:
 	Channel(const std::string& name);
 
 public:
-	std::string& getName() {
-		return name_;
-	}
+	// Iterates through a StringTable and create an instance for each
+	// unique string represented as a nickname in this channel.
+	void merge(StringTable& names);
 
-	UserList& getUsers() {
-		return users_;
-	}
+	// <Getters>
+	const std::string& getName() { return m_name; }
+	const UserTable& getUsers() { return m_users; }
+	User* getUserByNick(const std::string& nick);
+	// </Getters>
 
-	User*  getUserByNick(const std::string& nick);
-	size_t mergeUsers(std::vector<std::string>& names);
+	// <Setters>
+	// …
+	// </Setters>
 
 private:
-	std::string name_;
-	UserList    users_;
+	std::string m_name;
+	UserTable   m_users;
 };
 
-}
+} // namespace perlite
 
 #endif

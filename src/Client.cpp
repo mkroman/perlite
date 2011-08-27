@@ -1,41 +1,37 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-
 #include "User.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "Command.hpp"
 #include "Network.hpp"
-#include "Constants.hpp"
 
 using namespace std;
 
-namespace Perlite {
+namespace perlite {
 
-Client::Client(void) {
-	network_ = new Network();
+Client::Client(void) : m_network(new Network()) {
+	// …
 }
 
 Client::~Client(void) {
-	delete network_;
+	delete m_network;
 }
 
 bool Client::connect(const std::string& host, int port) {
-	if (network_->connect(host, port)) {
-		size_t result;
+	if (m_network->connect(host, port)) {
+		int size;
 
-		result = network_->sendCommand("NICK :%s", "mynick");
+		size = m_network->sendCommand("NICK :%s", "mynick");
 
-		if (result == (size_t)-1) {
+		if (size == -1) {
 			cerr << "Could not send initial NICK command." << endl;
 
 			return false;
 		}
 
-		result = network_->sendCommand("USER %s unknown unknown :%s", "myuser", "myrealname");
+		size = m_network->sendCommand("USER %s unknown unknown :%s",
+			"myuser", "myrealname");
 
-		if (result == (size_t)-1) {
+		if (size == -1) {
 			cerr << "Could not send initial USER command." << endl;
 
 			return false;
@@ -45,78 +41,74 @@ bool Client::connect(const std::string& host, int port) {
 	return true;
 }
 
-void Client::loop(void) {
+void Client::runLoop(void) {
 	Command* command;
-	std::string buffer;
+	std::string line;
 
-	while (network_->readLine(buffer)) {
-		command = Command::parse(buffer);
+	while (m_network->readLine(line)) {
+		command = Command::parseLine(line);
 
-		if (command)
-			handleCommand(command);
+		processCommand(command);
 
-		cout << buffer << endl;
+		cout << line << endl;
+
+		// After this, the command instance will be out of scope with no
+		// reference to it. We can't have that.
+		delete command;
 	}
 }
 
-void Client::handleCommand(Command* command) {
+void Client::processCommand(Command* command) {
 	if (command->isNumeric()) {
 		if (command->getCode() == 422 || command->getCode() == 376) {
-			network_->sendCommand("JOIN %s", "#uplink");
+			m_network->sendCommand("JOIN %s", "#uplink");
 		}
 		// The /NAMES list
-		else if (command->getCode() == 353)
-		{
-			string    name;
-			Channel*  channel;
+		else if (command->getCode() == 353) {
+			string   name;
+			Channel* channel;
 
 			name = command->getParam(2);
 
 			// Attempt to get the channel instance
-			channel = network_->getChannelByName(name);
+			channel = m_network->getChannelByName(name);
 
 			// If it failed, create the channel
 			if (!channel) {
 				channel = new Channel(name);
-				network_->addChannel(channel);
+				m_network->addChannel(channel);
 			}
 
-			std::vector<std::string> users;
-			users = splitNamesTable(command->getParam(3));
+			StringTable nicknames;
+			nicknames = splitNamesTable(command->getParam(3));
 
-			channel->mergeUsers(users);
+			channel->merge(nicknames);
 		}
 	}
 	else {
 		if (command->getName() == "PING") {
-			network_->sendCommand("PONG :%s", command->getParam(0).c_str());
+			m_network->sendCommand("PONG :%s", command->getParam(0).c_str());
 		}
 		else if (command->getName() == "PRIVMSG") {
-			if (command->getParam(1) == "!stats") {
-				char message[256];
-
-				sprintf(message, "Channels: %d, Users in channel #1: %d", 
-					(int)network_->getChannels().size(), (int)network_->getChannels()[0]->getUsers().size());
-
-				network_->sendCommand("PRIVMSG %s :%s", command->getParam(0).c_str(), message);
-			}
+			// …
 		}
 	}
 }
 
-std::vector<std::string> Client::splitNamesTable(const std::string& table) {
+// FIXME: Utilize C++ strings.
+const StringTable Client::splitNamesTable(const string& names) {
 	char* ptr;
-	std::vector<std::string> names;
+	StringTable stringTable;
 
-	ptr = strtok(const_cast<char*>(table.c_str()), " ");
+	ptr = strtok(const_cast<char*>(names.c_str()), " ");
 
 	while (ptr != NULL) {
-		names.push_back(std::string(ptr));
+		stringTable.push_back(string(ptr));
 
 		ptr = strtok(NULL, " ");
 	}
 
-	return names;
+	return stringTable;
 }
 
-}
+} // namespace perlite

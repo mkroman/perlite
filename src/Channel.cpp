@@ -1,39 +1,39 @@
-#include <string>
-#include <vector>
-
 #include "Channel.hpp"
 
-namespace Perlite {
+using namespace std;
 
-Channel::Channel(const std::string& name) : name_(name) {
-	
+namespace perlite {
+
+Channel::Channel(const string& name) : m_name(name) {
+	// …
 }
 
-size_t Channel::mergeUsers(std::vector<std::string>& names) {
-	std::vector<std::string>::iterator it;
-	size_t num = 0;
+void Channel::merge(StringTable& names) {
 	User* user;
+	StringTable::iterator it;
 
+	// Iterate over every nickname that is in the channel.
 	for (it = names.begin(); it < names.end(); it++) {
-		if (getUserByNick((std::string)*it) == NULL) {
+		// If it doesn't exist, create it.
+		if (getUserByNick(*it) == 0) {
 			user = new User(*it, this);
-			users_.push_back(user);
-			num++;
+
+			m_users.push_back(user);
 		}
 	}
-
-	return num;
 }
 
-User* Channel::getUserByNick(const std::string& nick) {
-	UserList::iterator it;
+User* Channel::getUserByNick(const string& nick) {
+	UserTable::iterator it;
 
-	for (it = users_.begin(); it < users_.end(); it++) {
+	// Iterate over every user that is in the channel.
+	for (it = m_users.begin(); it < m_users.end(); it++) {
+		// Return a pointer reference to the instance if the nicks match.
 		if (((User*)*it)->getNick() == nick)
 			return *it;
 	}
 
-	return NULL;
+	return 0;
 }
 
-}
+} // namespace perlite
