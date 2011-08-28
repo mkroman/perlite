@@ -35,7 +35,7 @@ Command* Command::parseLine(const string& line) {
 		index = buffer.find(' ', 0);
 
 		if (index != string::npos)
-			prefix = slice(buffer, 1, index);
+			prefix = slice(buffer, 1, index - 1, 2);
 	}
 
 	// Parse command
@@ -93,6 +93,8 @@ void Command::parsePrefix() {
 
 		// Save the hostname.
 		m_host = m_prefix.substr(end + 1);
+
+		m_flags |= CMD_USER;
 	}
 }
 
@@ -105,8 +107,7 @@ signed int Command::strtoi(const string& source) {
 	return i;
 }
 
-string Command::slice(string& source, size_t start, size_t finish,
-	size_t add) {
+string Command::slice(string& source, size_t start, size_t finish, size_t add) {
 	string slice;
 
 	slice = source.substr(start, finish);

@@ -27,6 +27,19 @@ void Channel::merge(StringTable& nickList) {
 	}
 }
 
+// Remove a pointer to a user instance and release the user instance from memory.
+void Channel::release(User* user) {
+	UserTable::iterator it;
+
+	for (it = m_users.begin(); it < m_users.end(); it++) {
+		if (*it == user) {
+			m_users.erase(it);
+
+			delete user;
+		}
+	}
+}
+
 // Search for a user with a specific nickname.
 User* Channel::getUserByNick(const string& nick) {
 	UserTable::iterator it;

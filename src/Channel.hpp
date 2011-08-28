@@ -28,6 +28,7 @@ public:
 
 	// <Setters>
 	void addUser(User* user) { m_users.push_back(user); }
+	void release(User* user);
 	// </Setters>
 
 private:

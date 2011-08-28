@@ -18,14 +18,16 @@ public:
 public:
 	// <Getters>
 	bool isNumeric() { return (m_code != 0); }
-	signed int getCode() { return m_code; }
-	const std::string& getNick() { return m_nick; }
-	const std::string& getName() { return m_name; }
-	const std::string& getPrefix() { return m_prefix; }
-	const ParamTable& getParameters() { return m_params; }
-	const Parameter& getParam(size_t index) { return m_params.at(index); }
 	const uint8_t getFlags() { return m_flags; }
+	signed int getCode() { return m_code; }
 	const char* getCParam(size_t index) { return m_params.at(index).c_str(); }
+	const Parameter& getParam(size_t index) { return m_params.at(index); }
+	const ParamTable& getParameters() { return m_params; }
+	const std::string& getNick() { return m_nick; }
+	const std::string& getHost() { return m_host; }
+	const std::string& getName() { return m_name; }
+	const std::string& getIdent() { return m_ident; }
+	const std::string& getPrefix() { return m_prefix; }
 	// </Getters>
 
 	// <Setters>
@@ -39,7 +41,7 @@ public:
 	// Returns the substring of source with start index of start, to finish.
 	// The source is then cut from 0 to the finish index + the add parameter.
 	static std::string slice(std::string& source, size_t start, size_t finish,
-		                     size_t add = 1);
+		                                                        size_t add = 1);
 	// </Helpers>
 
 protected:

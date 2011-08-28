@@ -46,12 +46,12 @@ void Client::runLoop() {
 
 void Client::processCommand(Command* command) {
 	if (command->getFlags() & CMD_LITERAL) {
-		cout << "'" << command->getName() << "'" << endl;
-
 		if (command->getName() == "PING")
 			cmdPing(m_network, command);
 		else if (command->getName() == "JOIN")
-			cout << "JOINFORHELVEDE" << endl;
+			cmdJoin(m_network, command);
+		else if (command->getName() == "PART")
+			cmdPart(m_network, command);
 		else
 			cmdUnhandled(m_network, command);
 	}
@@ -70,8 +70,6 @@ void Client::cmdPing(Network* network, Command* command) {
 }
 
 void Client::cmdJoin(Network* network, Command* command) {
-	cout << "LOLZ" << endl;
-
 	User* user;
 	Channel* channel = network->getChannelByName(command->getParam(0));
 
@@ -83,21 +81,39 @@ void Client::cmdJoin(Network* network, Command* command) {
 		user = channel->getUserByNick(command->getNick());
 
 		// This is a new user.
-		if (!user) {
-			network->sendCommand("PRIVMSG #test :lort2");
-			network->sendCommand("PRIVMSG #test :hej %s", command->getNick().c_str());
-			channel->addUser(new User(command->getNick(), channel));
-		}
-		else {
-			network->sendCommand("PRIVMSG #test :lort");
-			network->sendCommand("PRIVMSG #test :hej2 %s", command->getNick().c_str());
+		if (!user && command->getFlags() & CMD_USER) {
+			user = new User(command->getNick(), channel);
+			user->setHost(command->getHost());
+			user->setIdent(command->getIdent());
+
+			channel->addUser(user);
+
+			network->sendCommand("PRIVMSG #test :Welcome, %s! Your host is %s.",
+			                     command->getNick().c_str(), command->getHost().c_str());
 		}
 		
 	}
 }
 
 void Client::cmdPart(Network* network, Command* command) {
-	// …
+	User* user;
+	Channel* channel = network->getChannelByName(command->getParam(0));
+
+	// Should NOT happen, no matter what.
+	if (!channel) {
+		cout << "Warning: Received PART for an unknown channel." << endl;
+	}
+	else {
+		user = channel->getUserByNick(command->getNick());
+
+		// Should NOT happen either, it's more likely, though.
+		if (!user) {
+			cout << "Warning: Received PART for an unknown user." << endl;
+		}
+		else {
+			channel->release(user);
+		}
+	}
 }
 
 void Client::cmdEndOfMOTD(Network* network, Command* command) {
