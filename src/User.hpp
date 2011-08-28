@@ -1,6 +1,7 @@
 #ifndef __PERLITE_USER_H_
 #define __PERLITE_USER_H_
 #include <string>
+#include <stdint.h>
 
 namespace perlite {
 
@@ -11,11 +12,13 @@ public:
 	User(const std::string& nick, Channel* channel);
 
 public:
+	const uint16_t getFlags() { return m_flags; }
 	const std::string& getNick() { return m_nick; }
 
 private:
-	std::string m_nick;
+	uint8_t     m_flags;
 	Channel*    m_channel;
+	std::string m_nick;
 };
 
 } // namespace perlite

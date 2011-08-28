@@ -2,6 +2,7 @@
 #define __PERLITE_CHANNEL_H_
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 #include "Perlite.hpp"
 #include "User.hpp"
@@ -16,21 +17,23 @@ public:
 public:
 	// Iterates through a StringTable and create an instance for each
 	// unique string represented as a nickname in this channel.
-	void merge(StringTable& names);
+	void merge(StringTable& nickList);
 
 	// <Getters>
-	const std::string& getName() { return m_name; }
-	const UserTable& getUsers() { return m_users; }
 	User* getUserByNick(const std::string& nick);
+	UserTable& getUsers() { return m_users; }
+	const uint16_t getFlags() { return m_flags; }
+	const std::string& getName() { return m_name; }
 	// </Getters>
 
 	// <Setters>
-	// …
+	void addUser(User* user) { m_users.push_back(user); }
 	// </Setters>
 
 private:
-	std::string m_name;
+	uint16_t    m_flags;
 	UserTable   m_users;
+	std::string m_name;
 };
 
 } // namespace perlite

@@ -16,18 +16,14 @@ Channel::~Channel() {
 // Merge the current user table with a string containing nicks split by spaces.
 // The nicks are prefixed with their flags (+/@/%/~), no host- or username is
 // available at this point.
-void Channel::merge(StringTable& names) {
-	User* user;
+void Channel::merge(StringTable& nickList) {
 	StringTable::iterator it;
 
 	// Iterate over every nickname that is in the channel.
-	for (it = names.begin(); it < names.end(); it++) {
+	for (it = nickList.begin(); it < nickList.end(); it++) {
 		// If it doesn't exist, create it.
-		if (getUserByNick(*it) == 0) {
-			user = new User(*it, this);
-
-			m_users.push_back(user);
-		}
+		if (!getUserByNick(*it))
+			m_users.push_back(new User(*it, this));
 	}
 }
 

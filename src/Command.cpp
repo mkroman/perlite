@@ -4,6 +4,24 @@ using namespace std;
 
 namespace perlite {
 
+Command::Command(signed int code, string prefix, ParamTable params) : 
+                 m_code(code), m_params(params), m_prefix(prefix) {
+    // Parse the prefix if it's a hostmask.
+    if (!m_prefix.empty() && m_prefix.find_first_of("!@") != string::npos)
+    	parsePrefix();
+    	
+	m_flags &= ~CMD_LITERAL;
+}
+
+Command::Command(string name, string prefix, ParamTable params) :
+                 m_code(0), m_params(params), m_name(name), m_prefix(prefix) {
+    // Parse the prefix if it's a hostmask.
+    if (!m_prefix.empty() && m_prefix.find_first_of("!@") != string::npos)
+    	parsePrefix();
+
+	m_flags |= CMD_LITERAL;
+}
+
 Command* Command::parseLine(const string& line) {
 	Command* command;
 	vector<string> params;
@@ -59,22 +77,42 @@ Command* Command::parseLine(const string& line) {
 	return command;
 }
 
+void Command::parsePrefix() {
+	size_t begin, end;
+	string nick, ident, host;
+
+	// Parse the nickname, username and hostname if it's in the prefix.
+	if ((end = m_prefix.find_first_of('!')) != string::npos) {
+		// Save the nickname.
+		m_nick = m_prefix.substr(0, end);
+
+		// Save the ident/username.
+		begin = end + 1;
+		end = m_prefix.find_first_of('@');
+		m_ident = m_prefix.substr(begin, end);
+
+		// Save the hostname.
+		m_host = m_prefix.substr(end + 1);
+	}
+}
+
 signed int Command::strtoi(const string& source) {
 	signed int i = 0;
-	stringstream _stream(source);
-	_stream >> i;
+	stringstream stream(source);
+	
+	stream >> i;
 
 	return i;
 }
 
 string Command::slice(string& source, size_t start, size_t finish,
 	size_t add) {
-	string _slice;
+	string slice;
 
-	_slice = source.substr(start, finish);
+	slice = source.substr(start, finish);
 	source.erase(0, finish + add);
 
-	return _slice;
+	return slice;
 }
 
 } // namespace perlite

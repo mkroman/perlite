@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "Perlite.hpp"
 
@@ -18,11 +19,18 @@ public:
 	// <Getters>
 	bool isNumeric() { return (m_code != 0); }
 	signed int getCode() { return m_code; }
+	const std::string& getNick() { return m_nick; }
 	const std::string& getName() { return m_name; }
 	const std::string& getPrefix() { return m_prefix; }
 	const ParamTable& getParameters() { return m_params; }
 	const Parameter& getParam(size_t index) { return m_params.at(index); }
+	const uint8_t getFlags() { return m_flags; }
+	const char* getCParam(size_t index) { return m_params.at(index).c_str(); }
 	// </Getters>
+
+	// <Setters>
+	void setMask(std::string nick, std::string ident, std::string host);
+	// </Setters>
 
 	// <Helpers>
 	// Converts a std::string instance to a signed integer.
@@ -31,21 +39,26 @@ public:
 	// Returns the substring of source with start index of start, to finish.
 	// The source is then cut from 0 to the finish index + the add parameter.
 	static std::string slice(std::string& source, size_t start, size_t finish,
-		size_t add = 1);
+		                     size_t add = 1);
 	// </Helpers>
 
 protected:
-	Command(signed int code, std::string prefix, ParamTable params) :
-		m_code(code), m_prefix(prefix), m_params(params) {};
+	Command(signed int code, std::string prefix, ParamTable params);
+	Command(std::string name, std::string prefix, ParamTable params);
 
-	Command(std::string name, std::string prefix, ParamTable params) :
-		m_code(0), m_name(name), m_prefix(prefix), m_params(params) {};
+	// Cut the prefix up and save nickname, username and hostname to their 
+	// designated member variable.
+	void parsePrefix();
 
 private:
-	signed int  m_code;
-	std::string m_name;
-	std::string m_prefix;
-	ParamTable  m_params;
+	uint8_t       m_flags;
+	signed int    m_code;
+	ParamTable    m_params;
+	std::string   m_name;
+	std::string   m_prefix;
+	std::string   m_nick;
+	std::string   m_host;
+	std::string   m_ident;
 };
 
 } // namespace perlite
