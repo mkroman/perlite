@@ -72,7 +72,7 @@ bool Network::connect(const string& host, int port) {
 }
 
 size_t Network::readLine(string& destination) {
-  char   buffer[MIN_BUFFER_SIZE], tmp;
+  char   buffer[kMinBufferSize], tmp;
   size_t size = 0, read = 0, i = 0;
 
   for (i = 0; i < sizeof(buffer); i++) {
@@ -96,7 +96,7 @@ size_t Network::readLine(string& destination) {
 
 size_t Network::sendCommand(const string& format, ...) {
   va_list vargs;
-  char buffer[MIN_BUFFER_SIZE];
+  char buffer[kMinBufferSize];
   size_t result = 0, length = 0;
 
   va_start(vargs, format);

@@ -10,16 +10,16 @@ User::User(const std::string& nick, Channel* channel) : m_channel(channel) {
   // nickname, if any is present.
   switch (nick[0]) {
     case '~':
-      m_flags |= PERM_OWNER;
+      m_flags |= kLevelOwner;
       break;
     case '@':
-      m_flags |= PERM_OPER;
+      m_flags |= kLevelOper;
       break;
     case '%':
-      m_flags |= PERM_HALFOPER;
+      m_flags |= kLevelHalfOper;
       break;
     case '+':
-      m_flags |= PERM_VOICE;
+      m_flags |= kLevelVoice;
       break;
     default:
       m_flags = 0;

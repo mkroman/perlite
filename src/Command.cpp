@@ -13,9 +13,9 @@ Command::Command(signed int code, string prefix, ParamTable params)
     if (!m_prefix.empty() && m_prefix.find_first_of("!@") != string::npos)
       parsePrefix();
     else
-      m_flags &= ~CMD_USER;
+      m_flags &= ~kCmdUser;
       
-  m_flags &= ~CMD_LITERAL;
+  m_flags &= ~kCmdLiteral;
 }
 
 Command::Command(string name, string prefix, ParamTable params)
@@ -28,9 +28,9 @@ Command::Command(string name, string prefix, ParamTable params)
     if (!m_prefix.empty() && m_prefix.find_first_of("!@") != string::npos)
       parsePrefix();
     else
-      m_flags &= ~CMD_USER;
+      m_flags &= ~kCmdUser;
 
-  m_flags |= CMD_LITERAL;
+  m_flags |= kCmdLiteral;
 }
 
 Command* Command::parseLine(const string& line) {
@@ -61,7 +61,7 @@ Command* Command::parseLine(const string& line) {
   }
 
   // Parse parameters
-  while (params.size() < MAX_PARAM_COUNT && !buffer.empty()) {
+  while ((int)params.size() < kMaxParamCount && !buffer.empty()) {
     if (buffer[0] == ':') {
       params.push_back(buffer.substr(1));
       break;
@@ -105,7 +105,7 @@ void Command::parsePrefix() {
     // Save the hostname.
     m_host = m_prefix.substr(end + 1);
 
-    m_flags |= CMD_USER;
+    m_flags |= kCmdUser;
   }
 }
 

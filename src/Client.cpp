@@ -17,7 +17,7 @@ bool Client::connect(const std::string& host, int port) {
     }
 
     if (!m_network->sendCommand("USER %s unknown unknown :%s", "myuser",
-                  "myrealname")) {
+                                "myrealname")) {
       cerr << "Could not send initial USER command." << endl;
 
       return false;
@@ -45,7 +45,7 @@ void Client::runLoop() {
 }
 
 void Client::processCommand(Command* command) {
-  if (command->getFlags() & CMD_LITERAL) {
+  if (command->getFlags() & kCmdLiteral) {
     if (command->getName() == "PING")
       cmdPing(m_network, command);
     else if (command->getName() == "JOIN")
@@ -81,7 +81,7 @@ void Client::cmdJoin(Network* network, Command* command) {
     user = channel->getUserByNick(command->getNick());
 
     // This is a new user.
-    if (!user && command->getFlags() & CMD_USER) {
+    if (!user && command->getFlags() & kCmdUser) {
       user = new User(command->getNick(), channel);
       user->setHost(command->getHost());
       user->setIdent(command->getIdent());
@@ -89,7 +89,8 @@ void Client::cmdJoin(Network* network, Command* command) {
       channel->addUser(user);
 
       network->sendCommand("PRIVMSG #test :Welcome, %s! Your host is %s.",
-                           command->getNick().c_str(), command->getHost().c_str());
+                           command->getNick().c_str(),
+                           command->getHost().c_str());
     }
     
   }
@@ -146,7 +147,7 @@ void Client::cmdNameReply(Network* network, Command* command) {
 }
 
 void Client::cmdUnhandled(Network* network, Command* command) {
-  if (command->getFlags() & CMD_LITERAL) {
+  if (command->getFlags() & kCmdLiteral) {
     // …
   }
   else {
