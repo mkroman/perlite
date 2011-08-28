@@ -7,16 +7,16 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	perlite::Client* client = new perlite::Client();
+  perlite::Client* client = new perlite::Client();
 
-	if (client->connect("uplink.io", 6667)) {
-		client->runLoop();
-	}
-	else {
-		cerr << "Connection failed." << endl;
-	}
+  if (client->connect("uplink.io", 6667)) {
+    client->runLoop();
+  }
+  else {
+    cerr << "Connection failed." << endl;
+  }
 
-	delete client;
+  delete client;
 
-	return 0;
+  return 0;
 }

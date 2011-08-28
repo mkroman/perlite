@@ -8,7 +8,7 @@
                             // where the last 2 bytes is CRLF.
 
 #define _vector_each(i,v) \
-	for ((i) = (v).begin(); (i) < (v).end(); (i)++)
+  for ((i) = (v).begin(); (i) < (v).end(); (i)++)
 
 namespace perlite {
 
@@ -20,12 +20,12 @@ typedef std::vector<Parameter>   ParamTable;
 
 typedef std::vector<User*>       UserTable;
 typedef std::vector<Channel*>    ChannelTable;
-typedef	std::vector<std::string> StringTable;
+typedef std::vector<std::string> StringTable;
 
 typedef enum { CMD_LITERAL = 0x80, CMD_USER = 0x40 } CommandTypes;
 
 typedef enum { PERM_OWNER = 0x80, PERM_ADMIN = 0x40, PERM_OPER = 0x20,
-			   PERM_HALFOPER = 0x10, PERM_VOICE = 0x04 } UserPermissions;
+         PERM_HALFOPER = 0x10, PERM_VOICE = 0x04 } UserPermissions;
 
 } // namespace perlite
 
