@@ -32,11 +32,11 @@ void Client::runLoop() {
   std::string line;
 
   while (m_network->readLine(line)) {
+    cout << line << endl;
+
     command = Command::parseLine(line);
 
     processCommand(command);
-
-    cout << line << endl;
 
     // After this, the command instance will be out of scope with no
     // reference to it. We can't have that.
@@ -46,14 +46,26 @@ void Client::runLoop() {
 
 void Client::processCommand(Command* command) {
   if (command->getFlags() & kCmdLiteral) {
-    if (command->getName() == "PING")
+    if (command->getName() == "PING") {
       cmdPing(m_network, command);
-    else if (command->getName() == "JOIN")
+    }
+    else if (command->getName() == "JOIN") {
       cmdJoin(m_network, command);
-    else if (command->getName() == "PART")
+    }
+    else if (command->getName() == "PART") {
       cmdPart(m_network, command);
-    else
+    }
+    else if (command->getName() == "QUIT") {
+      cmdQuit(m_network, command);
+    }
+    else if (command->getName() == "PRIVMSG") {
+      if (command->getParam(1) == "!exit") {
+        m_network->disconnect();
+      }
+    }
+    else {
       cmdUnhandled(m_network, command);
+    }
   }
   else {
     if (command->getCode() == 353)
@@ -78,19 +90,26 @@ void Client::cmdJoin(Network* network, Command* command) {
     cout << "Warning: Received JOIN for an unknown channel." << endl;
   }
   else {
-    user = channel->getUserByNick(command->getNick());
+    if (command->getFlags() &~ kCmdUser)
+      return;
+
+    user = network->getUserByNick(command->getNick());
 
     // This is a new user.
-    if (!user && command->getFlags() & kCmdUser) {
-      user = new User(command->getNick(), channel);
+    if (!user && command->getFlags()) {
+      user = new User(command->getNick());
       user->setHost(command->getHost());
       user->setIdent(command->getIdent());
 
-      channel->addUser(user);
+      network->addUser(user);
+      channel->addUserRef(user);
 
       network->sendCommand("PRIVMSG #test :Welcome, %s! Your host is %s.",
                            command->getNick().c_str(),
                            command->getHost().c_str());
+    }
+    else {
+      channel->addUserRef(user);
     }
     
   }
@@ -105,14 +124,34 @@ void Client::cmdPart(Network* network, Command* command) {
     cout << "Warning: Received PART for an unknown channel." << endl;
   }
   else {
-    user = channel->getUserByNick(command->getNick());
+    user = network->getUserByNick(command->getNick());
 
     // Should NOT happen either, it's more likely, though.
     if (!user) {
       cout << "Warning: Received PART for an unknown user." << endl;
     }
     else {
-      channel->release(user);
+      channel->delUserRef(user);
+      network->delUser(user);
+    }
+  }
+}
+
+void Client::cmdQuit(Network* network, Command* command) {
+  UserTable::iterator it;
+  ChannelTable::iterator cit;
+
+  if (!(command->getFlags() & kCmdUser))
+    return;
+
+  for (it = network->getUsers().begin(); it < network->getUsers().end(); it++) {
+    if ((*it)->getNick() == command->getNick()) {
+      for (cit = (*it)->getChannels().begin(); cit < (*it)->getChannels().end()
+          ;cit++) {
+        (*cit)->delUserRef(*it);
+      }
+
+      network->delUser(*it);
     }
   }
 }
@@ -122,6 +161,7 @@ void Client::cmdEndOfMOTD(Network* network, Command* command) {
 }
 
 void Client::cmdNameReply(Network* network, Command* command) {
+  User* user;
   Channel* channel = network->getChannelByName(command->getParam(2));
 
   // If the channel is new to us - create it.
@@ -137,12 +177,18 @@ void Client::cmdNameReply(Network* network, Command* command) {
   // Iterate through all the nicks and create a linked user instance.
   StringTable::iterator it;
 
-  _vector_each(it, nickList) {
+  for (it = nickList.begin(); it < nickList.end(); it++) {
     // Check if the nickname is already known.
-    if (!channel->getUserByNick(*it)) {
-      // Create and add it.
-      channel->addUser(new User(*it, channel));
-     }
+    user = network->getUserByNick(*it);
+
+    if (!user) {
+      // Create a new user.
+      user = new User(*it);
+      // Add it.
+      network->addUser(user);
+    }
+
+    channel->addUserRef(user);
   }
 }
 

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Command.hpp"
 
 using namespace std;
@@ -43,7 +44,7 @@ Command* Command::parseLine(const string& line) {
 
   // Parse prefix
   if (line[0] == ':') {
-    index = buffer.find(' ', 0);
+    index = buffer.find(' ');
 
     if (index != string::npos)
       prefix = slice(buffer, 1, index - 1, 2);
@@ -54,7 +55,7 @@ Command* Command::parseLine(const string& line) {
     code = strtoi(slice(buffer, 0, 3));
   }
   else {
-    index = buffer.find(' ', 0);
+    index = buffer.find(' ');
 
     if (index != string::npos)
       name = slice(buffer, 0, index);
@@ -67,10 +68,10 @@ Command* Command::parseLine(const string& line) {
       break;
     }
     else {
-      index = buffer.find(' ', 0);
+      index = buffer.find(' ');
 
       if (index == string::npos) {
-        params.push_back(slice(buffer, 0, index, 0));
+        params.push_back(slice(buffer, 0, buffer.size(), 0));
       }
       else {
         params.push_back(slice(buffer, 0, index, 1));
@@ -90,7 +91,6 @@ Command* Command::parseLine(const string& line) {
 
 void Command::parsePrefix() {
   size_t begin, end;
-  string nick, ident, host;
 
   // Parse the nickname, username and hostname if it's in the prefix.
   if ((end = m_prefix.find_first_of('!')) != string::npos) {
@@ -122,7 +122,7 @@ string Command::slice(string& source, size_t start, size_t finish, size_t add) {
   string slice;
 
   slice = source.substr(start, finish);
-  source.erase(0, finish + add);
+  source = source.substr(finish + add);
 
   return slice;
 }

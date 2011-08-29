@@ -5,7 +5,7 @@ using namespace std;
 
 namespace perlite {
 
-User::User(const std::string& nick, Channel* channel) : m_channel(channel) {
+User::User(const std::string& nick) {
   // Change permission flags according to the leading character in the
   // nickname, if any is present.
   switch (nick[0]) {
@@ -30,6 +30,16 @@ User::User(const std::string& nick, Channel* channel) : m_channel(channel) {
     m_nick = nick.substr(1);
   else
     m_nick = nick;
+}
+
+void User::delChannelRef(Channel* channel) {
+  ChannelTable::iterator it;
+
+  for (it = m_channels.begin(); it < m_channels.end(); it++) {
+    if (*it == channel) {
+      m_channels.erase(it);
+    }
+  }
 }
 
 } // namespace perlite

@@ -3,9 +3,6 @@
 #include <vector>
 #include <string>
 
-#define _vector_each(i,v) \
-  for ((i) = (v).begin(); (i) < (v).end(); (i)++)
-
 namespace perlite {
 
 const int kMaxParamCount = 10;  // Maximum number of parameters parsed in a line.

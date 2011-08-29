@@ -78,6 +78,9 @@ size_t Network::readLine(string& destination) {
   for (i = 0; i < sizeof(buffer); i++) {
     read = ::recv(m_socket, &tmp, sizeof(char), 0);
 
+    if ((int)read == -1)
+      break;
+
     if (tmp == '\r')
       continue;
     else if (tmp == '\n')
@@ -123,10 +126,23 @@ size_t Network::sendData(const char* data, size_t length) {
 
   size = ::send(m_socket, data, length, 0);
 
-  if (size == -1)
-    return -1;
-  else
-    return size;
+  return size;
+}
+
+void Network::disconnect() {
+  ::close(m_socket);
+  m_socket = 0;
+}
+
+User* Network::getUserByNick(const string& nick) {
+  UserTable::iterator it;
+
+  for (it = m_users.begin(); it < m_users.end(); it++) {
+    if ((*it)->getNick() == nick)
+      return *it;
+  }
+
+  return 0;
 }
 
 Channel* Network::getChannelByName(const string& name) {
@@ -140,10 +156,26 @@ Channel* Network::getChannelByName(const string& name) {
   return 0;
 }
 
-size_t Network::addChannel(Channel* channel) {
-  m_channels.push_back(channel);
-  
-  return m_channels.size();
+void Network::delUser(User* user) {
+  UserTable::iterator it;
+
+  for (it = m_users.begin(); it < m_users.end(); it++) {
+    if (*it == user) {
+      m_users.erase(it);
+      delete user;
+    }
+  }
+}
+
+void Network::delChannel(Channel* channel) {
+  ChannelTable::iterator it;
+
+  for (it = m_channels.begin(); it < m_channels.end(); it++) {
+    if (*it == channel) {
+      m_channels.erase(it);
+      delete channel;
+    }
+  }
 }
 
 } // namespace perlite

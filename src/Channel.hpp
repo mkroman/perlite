@@ -15,20 +15,15 @@ class Channel {
   ~Channel();
 
  public:
-  // Iterates through a StringTable and create an instance for each
-  // unique string represented as a nickname in this channel.
-  void merge(StringTable& nickList);
-
   // <Getters>
-  User* getUserByNick(const std::string& nick);
   UserTable& getUsers() { return m_users; }
   const uint16_t getFlags() { return m_flags; }
   const std::string& getName() { return m_name; }
   // </Getters>
 
   // <Setters>
-  void addUser(User* user) { m_users.push_back(user); }
-  void release(User* user);
+  void addUserRef(User* user);
+  void delUserRef(User* user);
   // </Setters>
 
  private:
