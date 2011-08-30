@@ -16,11 +16,6 @@ class User {
 
  public:
   // <Getters>
-  // Get the bitmask flags for the user.
-  // Flags:
-  //
-  // CMD_LITERAL - Set when it's not a numeric command (353, e.g.)
-  // CMD_USER    - Set when the prefix is in the form of a users hostmask.
   ChannelTable& getChannels() { return m_channels; }
 
   const std::string& getNick() { return m_nick; }

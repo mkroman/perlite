@@ -64,6 +64,9 @@ void Client::processCommand(Command* command) {
     else if (command->getName() == "TOPIC") {
       cmdTopic(m_network, command);
     }
+    else if (command->getName() == "KICK") {
+      cmdKick(m_network, command);
+    }
     else if (command->getName() == "PRIVMSG") {
       cmdPrivateMessage(m_network, command);
     }
@@ -178,7 +181,9 @@ void Client::cmdPart(Network* network, Command* command) {
     }
     else {
       channel->delUserRef(user);
-      network->delUser(user);
+
+      if (user->getChannels().size() == 0)
+        network->delUser(user);
     }
   }
 }
@@ -199,6 +204,36 @@ void Client::cmdQuit(Network* network, Command* command) {
 
       network->delUser(*it);
     }
+  }
+}
+
+void Client::cmdKick(Network* network, Command* command) {
+  string reason;
+  Channel* channel;
+  User* admin, *target;
+
+  reason = command->getParam(2);
+
+  if ((channel = network->getChannelByName(command->getParam(0)))) {
+    if ((admin = network->getUserByNick(command->getNick()))) {
+      if ((target = network->getUserByNick(command->getParam(1)))) {
+        cout << admin->getNick() << " kicked " << target->getNick() << " from " << channel->getName() << endl;
+
+        channel->delUserRef(target);
+
+        if (target->getChannels().size() == 0)
+          network->delUser(target);
+      }
+      else {
+        cout << "Warning: Received KICK for an unknown target." << endl;
+      }
+    }
+    else {
+      cout << "Warning: Received KICK from an unknown user." << endl;
+    } 
+  }
+  else {
+    cout << "Warning: Received KICK for an unknown channel." << endl;
   }
 }
 

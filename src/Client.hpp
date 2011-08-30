@@ -34,6 +34,7 @@ class Client {
   void cmdPart(Network* network, Command* command);
   void cmdQuit(Network* network, Command* command);
   void cmdNick(Network* network, Command* command);
+  void cmdKick(Network* network, Command* command);
   void cmdTopic(Network* network, Command* command);
   void cmdNameReply(Network* network, Command* command);
   void cmdUnhandled(Network* network, Command* command);
