@@ -81,6 +81,10 @@ void Client::processCommand(Command* command) {
     else if (command->getCode() == 332) {
       cmdTopicReply(m_network, command);
     }
+    // WARNING: non-standard!
+    else if (command->getCode() == 333) {
+      cmdTopicTimeReply(m_network, command);
+    }
     else {
       cmdUnhandled(m_network, command);
     }
@@ -221,10 +225,10 @@ void Client::cmdTopic(Network* network, Command* command) {
 
   if ((channel = network->getChannelByName(command->getParam(0)))) {
     channel->setTopic(command->getParam(1));
+    channel->setTopicTime(time(0));
 
     if ((user = network->getUserByNick(command->getNick()))) {
-      cout << user->getNick() << " changed the topic in " <<
-        channel->getName() << " to \"" << command->getParam(1) << "\"" << endl;
+      // …
     }
     else {
       cout << "Warning: Received TOPIC from an unknown user." << endl;
@@ -245,6 +249,17 @@ void Client::cmdTopicReply(Network* network, Command* command) {
     channel = new Channel(command->getParam(1));
     channel->setTopic(command->getParam(2));
     network->addChannel(channel);
+  }
+}
+
+void Client::cmdTopicTimeReply(Network* network, Command* command) {
+  Channel* channel;
+
+  if ((channel = network->getChannelByName(command->getParam(1)))) {
+    channel->setTopicTime(static_cast<time_t>(atoi(command->getCParam(3))));
+  }
+  else {
+    cout << "Warning: Received RPL_TOPICTIME from an unknown channel." << endl;
   }
 }
 

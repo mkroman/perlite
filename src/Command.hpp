@@ -36,7 +36,7 @@ class Command {
 
   // <Helpers>
   // Converts a std::string instance to a signed integer.
-  static signed int  strtoi(const std::string& str);
+  static signed int strtoi(const std::string& str);
 
   // Returns the substring of source with start index of start, to finish.
   // The source is then cut from 0 to the finish index + the add parameter.
