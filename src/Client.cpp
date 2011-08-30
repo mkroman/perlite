@@ -72,12 +72,18 @@ void Client::processCommand(Command* command) {
     }
   }
   else {
-    if (command->getCode() == 353)
+    if (command->getCode() == 353) {
       cmdNameReply(m_network, command);
-    else if (command->getCode() == 376 || command->getCode() == 422)
+    }
+    else if (command->getCode() == 376 || command->getCode() == 422) {
       cmdEndOfMOTD(m_network, command);
-    else
+    }
+    else if (command->getCode() == 332) {
+      cmdTopicReply(m_network, command);
+    }
+    else {
       cmdUnhandled(m_network, command);
+    }
   }
 }
 
@@ -111,6 +117,10 @@ void Client::cmdPrivateMessage(Network* network, Command* command) {
                              command->getCParam(0), 
                              channel->getUserFlags(user),
                              binary.c_str());
+      }
+      else if (command->getParam(1) == "!topic") {
+        network->sendCommand("PRIVMSG %s :Topic is: %s", command->getCParam(0),
+                             channel->getTopic().c_str());
       }
     }
   }
@@ -196,7 +206,7 @@ void Client::cmdNick(Network* network, Command* command) {
   User* user = 0;
   UserTable::iterator it;
 
-  if ((user = network->getUserByNick(command->getNick())) != 0) {
+  if ((user = network->getUserByNick(command->getNick()))) {
     cout << user->getNick() << " changed nickname to " << command->getParam(0) << "." << endl;
     user->setNick(command->getParam(0));
   }
@@ -206,13 +216,13 @@ void Client::cmdNick(Network* network, Command* command) {
 }
 
 void Client::cmdTopic(Network* network, Command* command) {
-  User* user = 0;
-  Channel* channel = 0;
+  User* user;
+  Channel* channel;
 
-  if ((channel = network->getChannelByName(command->getParam(0))) != 0) {
+  if ((channel = network->getChannelByName(command->getParam(0)))) {
     channel->setTopic(command->getParam(1));
 
-    if ((user = network->getUserByNick(command->getNick())) != 0) {
+    if ((user = network->getUserByNick(command->getNick()))) {
       cout << user->getNick() << " changed the topic in " <<
         channel->getName() << " to \"" << command->getParam(1) << "\"" << endl;
     }
@@ -222,6 +232,19 @@ void Client::cmdTopic(Network* network, Command* command) {
   }
   else {
     cout << "Warning: Received TOPIC from an unknown channel." << endl;
+  }
+}
+
+void Client::cmdTopicReply(Network* network, Command* command) {
+  Channel* channel;
+
+  if ((channel = network->getChannelByName(command->getParam(1)))) {
+    channel->setTopic(command->getParam(2));
+  }
+  else {
+    channel = new Channel(command->getParam(1));
+    channel->setTopic(command->getParam(2));
+    network->addChannel(channel);
   }
 }
 

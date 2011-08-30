@@ -38,6 +38,7 @@ class Client {
   void cmdNameReply(Network* network, Command* command);
   void cmdUnhandled(Network* network, Command* command);
   void cmdEndOfMOTD(Network* network, Command* command);
+  void cmdTopicReply(Network* network, Command* command);
   void cmdPrivateMessage(Network* network, Command* command);
 
   Network* m_network;
