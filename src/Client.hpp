@@ -1,5 +1,7 @@
 #ifndef __PERLITE_CLIENT_H_
 #define __PERLITE_CLIENT_H_
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -31,6 +33,7 @@ class Client {
   void cmdJoin(Network* network, Command* command);
   void cmdPart(Network* network, Command* command);
   void cmdQuit(Network* network, Command* command);
+  void cmdNick(Network* network, Command* command);
   void cmdNameReply(Network* network, Command* command);
   void cmdUnhandled(Network* network, Command* command);
   void cmdEndOfMOTD(Network* network, Command* command);
@@ -38,6 +41,8 @@ class Client {
 
   Network* m_network;
 };
+
+std::string itobase2(int i);
 
 } // namespace perlite
 

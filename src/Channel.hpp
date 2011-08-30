@@ -1,5 +1,6 @@
 #ifndef __PERLITE_CHANNEL_H_
 #define __PERLITE_CHANNEL_H_
+#include <map>
 #include <vector>
 #include <string>
 #include <stdint.h>
@@ -19,15 +20,22 @@ class Channel {
   UserTable& getUsers() { return m_users; }
   const uint16_t getFlags() { return m_flags; }
   const std::string& getName() { return m_name; }
+
+  const uint8_t getUserFlags(User* user);
   // </Getters>
 
   // <Setters>
   void addUserRef(User* user);
   void delUserRef(User* user);
+
+  void addUserFlags(User* user, uint8_t flags);
+  void delUserFlags(User* user, uint8_t flags);
+  void setUserFlags(User* user, uint8_t flags);
   // </Setters>
 
  private:
   uint16_t    m_flags;
+  UserFlags   m_userFlags;
   UserTable   m_users;
   std::string m_name;
 };

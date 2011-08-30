@@ -1,5 +1,7 @@
 #ifndef __PERLITE_H_
 #define __PERLITE_H_
+#include <stdint.h>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -18,6 +20,8 @@ typedef std::vector<Parameter>   ParamTable;
 typedef std::vector<User*>       UserTable;
 typedef std::vector<Channel*>    ChannelTable;
 typedef std::vector<std::string> StringTable;
+
+typedef std::map<User*, uint8_t> UserFlags;
 
 // kCmdUser is set when the command prefix is in the format of a users hostmask.
 // kCmdLiteral is set when the command is not in numeric form (353, e.g.)
@@ -38,6 +42,7 @@ enum UserPermissions {
   kLevelAdmin = 0x40,
   kLevelHalfOper = 0x10
 };
+
 
 } // namespace perlite
 

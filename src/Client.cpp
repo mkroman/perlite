@@ -58,10 +58,11 @@ void Client::processCommand(Command* command) {
     else if (command->getName() == "QUIT") {
       cmdQuit(m_network, command);
     }
+    else if (command->getName() == "NICK") {
+      cmdNick(m_network, command);
+    }
     else if (command->getName() == "PRIVMSG") {
-      if (command->getParam(1) == "!exit") {
-        m_network->disconnect();
-      }
+      cmdPrivateMessage(m_network, command);
     }
     else {
       cmdUnhandled(m_network, command);
@@ -81,6 +82,37 @@ void Client::cmdPing(Network* network, Command* command) {
   network->sendCommand("PONG :%s", command->getCParam(0));
 }
 
+void Client::cmdPrivateMessage(Network* network, Command* command) {
+  User* user;
+  Channel* channel;
+
+  channel = network->getChannelByName(command->getParam(0));
+
+  if (!channel) {
+    cout << "Warning: Received message from an unknown channel." << endl;
+  }
+
+  if (command->getFlags() & kCmdUser) {
+    user = network->getUserByNick(command->getNick());
+
+    if (!user) {
+      cout << "Warning: Received message from an unknown user." << endl;
+    }
+    else {
+      if (command->getParam(1) == "!userflags") {
+        string binary;
+
+        binary = itobase2(channel->getUserFlags(user));
+
+        network->sendCommand("PRIVMSG %s :Your flags are as follows: %#x (%s)",
+                             command->getCParam(0), 
+                             channel->getUserFlags(user),
+                             binary.c_str());
+      }
+    }
+  }
+}
+
 void Client::cmdJoin(Network* network, Command* command) {
   User* user;
   Channel* channel = network->getChannelByName(command->getParam(0));
@@ -90,13 +122,10 @@ void Client::cmdJoin(Network* network, Command* command) {
     cout << "Warning: Received JOIN for an unknown channel." << endl;
   }
   else {
-    if (command->getFlags() &~ kCmdUser)
-      return;
-
     user = network->getUserByNick(command->getNick());
 
     // This is a new user.
-    if (!user && command->getFlags()) {
+    if (!user && command->getFlags() & kCmdUser) {
       user = new User(command->getNick());
       user->setHost(command->getHost());
       user->setIdent(command->getIdent());
@@ -104,7 +133,7 @@ void Client::cmdJoin(Network* network, Command* command) {
       network->addUser(user);
       channel->addUserRef(user);
 
-      network->sendCommand("PRIVMSG #test :Welcome, %s! Your host is %s.",
+      network->sendCommand("PRIVMSG #uplink :Welcome, %s! Your host is %s.",
                            command->getNick().c_str(),
                            command->getHost().c_str());
     }
@@ -157,7 +186,21 @@ void Client::cmdQuit(Network* network, Command* command) {
 }
 
 void Client::cmdEndOfMOTD(Network* network, Command* command) {
-  network->sendCommand("JOIN %s", "#test");
+  network->sendCommand("JOIN %s", "#uplink");
+}
+
+void Client::cmdNick(Network* network, Command* command) {
+  User* user = 0;
+  UserTable::iterator it;
+
+  if ((user = network->getUserByNick(command->getNick())) != 0) {
+    cout << user->getNick() << " changed nickname to " << command->getParam(0) << "." << endl;
+    user->setNick(command->getParam(0));
+  }
+  else {
+    cout << "Warning: Received NICK from an unknown user." << endl;
+  }
+
 }
 
 void Client::cmdNameReply(Network* network, Command* command) {
@@ -183,12 +226,43 @@ void Client::cmdNameReply(Network* network, Command* command) {
 
     if (!user) {
       // Create a new user.
-      user = new User(*it);
+      user = new User();
       // Add it.
       network->addUser(user);
-    }
+      channel->addUserRef(user);
 
-    channel->addUserRef(user);
+      // Parse the nickname for a leading character (~|!|@|+|&|%)
+      switch ((*it)[0]) {
+        case '@':
+          channel->addUserFlags(user, kLevelOper);
+          break;
+        case '~':
+          channel->addUserFlags(user, kLevelOwner);
+          break;
+        case '&':
+          channel->addUserFlags(user, kLevelAdmin);
+          break;
+        case '%':
+          channel->addUserFlags(user, kLevelHalfOper);
+          break;
+        case '+':
+          channel->addUserFlags(user, kLevelVoice);
+          break;
+        default:
+          channel->setUserFlags(user, 0);
+      }
+
+      // Skip the leading character.
+      if (channel->getUserFlags(user) & 255) {
+        user->setNick((*it).substr(1));
+      }
+      else {
+        user->setNick(*it);
+      }
+    }
+    else {
+      channel->addUserRef(user);
+    }
   }
 }
 
@@ -217,4 +291,21 @@ const StringTable Client::splitNamesTable(const string& names) {
   return table;
 }
 
+string itobase2(int i) {
+  int j = i;
+  div_t result;
+  string buffer;
+
+  while (j > 0) {
+    result = div(j, 2);
+
+	  buffer = static_cast<string>(result.rem == 0 ? "0" : "1").append(buffer);
+
+    j = result.quot;
+  }
+
+  return buffer;
+}
+
 } // namespace perlite
+

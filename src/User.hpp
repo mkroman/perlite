@@ -11,7 +11,8 @@ class Channel;
 
 class User {
  public:
-  User(const std::string& nick);
+  User() {};
+  User(const std::string& nick) : m_nick(nick) {};
 
  public:
   // <Getters>
@@ -20,7 +21,6 @@ class User {
   //
   // CMD_LITERAL - Set when it's not a numeric command (353, e.g.)
   // CMD_USER    - Set when the prefix is in the form of a users hostmask.
-  const uint16_t getFlags() { return m_flags; }
   ChannelTable& getChannels() { return m_channels; }
 
   const std::string& getNick() { return m_nick; }
@@ -38,7 +38,6 @@ class User {
   // </Setters>
 
  private:
-  uint8_t      m_flags;
   std::string  m_nick;
   std::string  m_host;
   std::string  m_ident;

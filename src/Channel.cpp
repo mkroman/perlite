@@ -13,6 +13,33 @@ Channel::~Channel() {
     delete *it;
 }
 
+const uint8_t Channel::getUserFlags(User* user) {
+  UserTable::iterator it;
+
+  // Check if the user even is in this channel.
+  for (it = m_users.begin(); it < m_users.end(); it++) {
+    if (*it == user) {
+      // Note: map::operator[] creates the key without a value if it doesn't
+      // already exist.
+      return m_userFlags[user];
+    }
+  }
+
+  return -1;
+}
+
+void Channel::addUserFlags(User* user, uint8_t flags) {
+  m_userFlags[user] |= flags;
+}
+
+void Channel::delUserFlags(User* user, uint8_t flags) {
+  m_userFlags[user] &= ~flags;
+}
+
+void Channel::setUserFlags(User* user, uint8_t flags) {
+  m_userFlags[user] = flags;
+}
+
 void Channel::addUserRef(User* user) {
   m_users.push_back(user);
   
