@@ -20,6 +20,7 @@ class Channel {
   UserTable& getUsers() { return m_users; }
   const uint16_t getFlags() { return m_flags; }
   const std::string& getName() { return m_name; }
+  const std::string& getTopic() { return m_topic; }
 
   const uint8_t getUserFlags(User* user);
   // </Getters>
@@ -31,6 +32,8 @@ class Channel {
   void addUserFlags(User* user, uint8_t flags);
   void delUserFlags(User* user, uint8_t flags);
   void setUserFlags(User* user, uint8_t flags);
+
+  void setTopic(const std::string& topic) { m_topic = topic; }
   // </Setters>
 
  private:
@@ -38,6 +41,7 @@ class Channel {
   UserFlags   m_userFlags;
   UserTable   m_users;
   std::string m_name;
+  std::string m_topic;
 };
 
 } // namespace perlite

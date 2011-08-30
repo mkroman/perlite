@@ -61,6 +61,9 @@ void Client::processCommand(Command* command) {
     else if (command->getName() == "NICK") {
       cmdNick(m_network, command);
     }
+    else if (command->getName() == "TOPIC") {
+      cmdTopic(m_network, command);
+    }
     else if (command->getName() == "PRIVMSG") {
       cmdPrivateMessage(m_network, command);
     }
@@ -200,7 +203,26 @@ void Client::cmdNick(Network* network, Command* command) {
   else {
     cout << "Warning: Received NICK from an unknown user." << endl;
   }
+}
 
+void Client::cmdTopic(Network* network, Command* command) {
+  User* user = 0;
+  Channel* channel = 0;
+
+  if ((channel = network->getChannelByName(command->getParam(0))) != 0) {
+    channel->setTopic(command->getParam(1));
+
+    if ((user = network->getUserByNick(command->getNick())) != 0) {
+      cout << user->getNick() << " changed the topic in " <<
+        channel->getName() << " to \"" << command->getParam(1) << "\"" << endl;
+    }
+    else {
+      cout << "Warning: Received TOPIC from an unknown user." << endl;
+    }
+  }
+  else {
+    cout << "Warning: Received TOPIC from an unknown channel." << endl;
+  }
 }
 
 void Client::cmdNameReply(Network* network, Command* command) {

@@ -20,7 +20,7 @@ const uint8_t Channel::getUserFlags(User* user) {
   for (it = m_users.begin(); it < m_users.end(); it++) {
     if (*it == user) {
       // Note: map::operator[] creates the key without a value if it doesn't
-      // already exist.
+      // already exist, that's why we perform this check.
       return m_userFlags[user];
     }
   }
