@@ -40,13 +40,16 @@ class Client {
   void cmdUnhandled(Network* network, Command* command);
   void cmdEndOfMOTD(Network* network, Command* command);
   void cmdTopicReply(Network* network, Command* command);
+  void cmdISupportReply(Network* network, Command* command);
   void cmdPrivateMessage(Network* network, Command* command);
   void cmdTopicTimeReply(Network* network, Command* command);
 
+ private:
   Network* m_network;
 };
 
 std::string itobase2(int i);
+const StringTable splitString(const std::string& input);
 
 } // namespace perlite
 

@@ -20,7 +20,7 @@ class Command {
   bool isNumeric() { return (m_code != 0); }
   const uint8_t getFlags() { return m_flags; }
   signed int getCode() { return m_code; }
-  const char* getCParam(size_t index) { return m_params.at(index).c_str(); }
+  const char* getAsciiParam(size_t index) { return m_params.at(index).c_str(); }
   const Parameter& getParam(size_t index) { return m_params.at(index); }
   const ParamTable& getParameters() { return m_params; }
   const std::string& getNick() { return m_nick; }

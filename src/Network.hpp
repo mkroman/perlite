@@ -8,6 +8,7 @@
 namespace perlite {
 
 class Channel;
+class ISupport;
 
 class Network {
  public:
@@ -37,6 +38,7 @@ class Network {
   // </Setters>
 
  private:
+  ISupport*    m_isupport;
   UserTable    m_users;
   std::string  m_host;
   unsigned int m_port;

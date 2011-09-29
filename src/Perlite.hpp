@@ -7,7 +7,7 @@
 
 namespace perlite {
 
-const int kMaxParamCount = 10;  // Maximum number of parameters parsed in a line.
+const int kMaxParamCount = 32;  // Maximum number of parameters parsed in a line.
 const int kMinBufferSize = 512; // Minimum buffer size. RFC 1459 defines max as 512
                                 // where the last 2 bytes is CRLF.
 

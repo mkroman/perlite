@@ -75,7 +75,10 @@ void Client::processCommand(Command* command) {
     }
   }
   else {
-    if (command->getCode() == 353) {
+    if (command->getCode() == 005) {
+      cmdISupportReply(m_network, command);
+    }
+    else if (command->getCode() == 353) {
       cmdNameReply(m_network, command);
     }
     else if (command->getCode() == 376 || command->getCode() == 422) {
@@ -95,7 +98,11 @@ void Client::processCommand(Command* command) {
 }
 
 void Client::cmdPing(Network* network, Command* command) {
-  network->sendCommand("PONG :%s", command->getCParam(0));
+  network->sendCommand("PONG :%s", command->getAsciiParam(0));
+}
+
+void Client::cmdISupportReply(Network* network, Command* command) {
+  StringTable parameters = command->getParameters();
 }
 
 void Client::cmdPrivateMessage(Network* network, Command* command) {
@@ -121,12 +128,12 @@ void Client::cmdPrivateMessage(Network* network, Command* command) {
         binary = itobase2(channel->getUserFlags(user));
 
         network->sendCommand("PRIVMSG %s :Your flags are as follows: %#x (%s)",
-                             command->getCParam(0), 
+                             command->getAsciiParam(0), 
                              channel->getUserFlags(user),
                              binary.c_str());
       }
       else if (command->getParam(1) == "!topic") {
-        network->sendCommand("PRIVMSG %s :Topic is: %s", command->getCParam(0),
+        network->sendCommand("PRIVMSG %s :Topic is: %s", command->getAsciiParam(0),
                              channel->getTopic().c_str());
       }
     }
@@ -238,7 +245,7 @@ void Client::cmdKick(Network* network, Command* command) {
 }
 
 void Client::cmdEndOfMOTD(Network* network, Command* command) {
-  network->sendCommand("JOIN %s", "#uplink");
+  network->sendCommand("JOIN %s", "#test");
 }
 
 void Client::cmdNick(Network* network, Command* command) {
@@ -291,7 +298,7 @@ void Client::cmdTopicTimeReply(Network* network, Command* command) {
   Channel* channel;
 
   if ((channel = network->getChannelByName(command->getParam(1)))) {
-    channel->setTopicTime(static_cast<time_t>(atoi(command->getCParam(3))));
+    channel->setTopicTime(static_cast<time_t>(atoi(command->getAsciiParam(3))));
   }
   else {
     cout << "Warning: Received RPL_TOPICTIME from an unknown channel." << endl;
@@ -310,7 +317,7 @@ void Client::cmdNameReply(Network* network, Command* command) {
   }
 
   // Split the nicknames and save them in a vector with strings.
-  StringTable nickList = splitNamesTable(command->getParam(3));
+  StringTable nickList = splitString(command->getParam(3));
 
   // Iterate through all the nicks and create a linked user instance.
   StringTable::iterator it;
@@ -370,17 +377,17 @@ void Client::cmdUnhandled(Network* network, Command* command) {
   }
 }
 
-const StringTable Client::splitNamesTable(const string& names) {
+const StringTable splitString(const string& input) {
   size_t start = 0, end = 0;
   StringTable table;
 
-  end = names.find(' ');
+  end = input.find(' ');
 
   while (end != string::npos) {
-    table.push_back(names.substr(start, end - start));
+    table.push_back(input.substr(start, end - start));
     start = end + 1;
 
-    end = names.find(' ', start);
+    end = input.find(' ', start);
   }
 
   return table;
