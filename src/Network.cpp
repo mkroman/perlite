@@ -19,163 +19,149 @@ namespace perlite {
 
 // Destroy every channel joined on this network and close the socket connection.
 Network::~Network() {
-  ChannelTable::iterator it;
+	ChannelTable::iterator it;
 
-  // Iterate over every channel instance and wipe it from memory.
-  for (it = m_channels.begin(); it < m_channels.end(); it++)
-    delete *it;
+	// Iterate over every channel instance and wipe it from memory.
+	for (it = m_channels.begin(); it < m_channels.end(); it++)
+		delete *it;
 
-  if (m_socket)
-    ::close(m_socket);
+	if (m_socket)
+		::close(m_socket);
 }
 
 // Establish a basic blocking IPv4 TCP connection.
 // Returns true on success, otherwise false.
 bool Network::connect(const string& host, int port) {
-  m_host = host;
-  m_port = port;
+	m_host = host;
+	m_port = port;
+	struct hostent*    remote_host;
+	struct sockaddr_in remote_addr;
+	m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
+	memset(&remote_addr, 0, sizeof(struct sockaddr_in));
 
-  struct hostent*    remote_host;
-  struct sockaddr_in remote_addr;
+	if (m_socket == -1) {
+		cerr << "::socket() failed" << endl;
+		return false;
+	}
 
-  m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
+	remote_host = ::gethostbyname(host.c_str());
 
-  memset(&remote_addr, 0, sizeof(struct sockaddr_in));
+	if (!remote_host) {
+		cerr << "::gethostbyname() failed" << endl;
+		return false;
+	}
 
-  if (m_socket == -1) {
-    cerr << "::socket() failed" << endl;
+	remote_addr.sin_family = AF_INET;
+	remote_addr.sin_port = htons(port);
+	memcpy(&remote_addr.sin_addr, remote_host->h_addr, remote_host->h_length);
 
-    return false;
-  }
+	if (::connect(m_socket, (struct sockaddr*)&remote_addr,
+	              sizeof(struct sockaddr)) == -1) {
+		cerr << "::connect() failed" << endl;
+		return false;
+	}
 
-  remote_host = ::gethostbyname(host.c_str());
-
-  if (!remote_host) {
-    cerr << "::gethostbyname() failed" << endl;
-
-    return false;
-  }
-
-  remote_addr.sin_family = AF_INET;
-  remote_addr.sin_port = htons(port);
-
-  memcpy(&remote_addr.sin_addr, remote_host->h_addr, remote_host->h_length);
-
-  if (::connect(m_socket, (struct sockaddr*)&remote_addr,
-      sizeof(struct sockaddr)) == -1) {
-    cerr << "::connect() failed" << endl;
-
-    return false;
-  }
-
-  return true;
+	return true;
 }
 
 size_t Network::readLine(string& destination) {
-  char   buffer[kMinBufferSize], tmp;
-  size_t size = 0, read = 0, i = 0;
+	char   buffer[kMinBufferSize], tmp;
+	size_t size = 0, read = 0, i = 0;
 
-  for (i = 0; i < sizeof(buffer); i++) {
-    read = ::recv(m_socket, &tmp, sizeof(char), 0);
+	for (i = 0; i < sizeof(buffer); i++) {
+		read = ::recv(m_socket, &tmp, sizeof(char), 0);
 
-    if ((int)read == -1)
-      break;
+		if ((int)read == -1)
+			break;
 
-    if (tmp == '\r')
-      continue;
-    else if (tmp == '\n')
-      break;
+		if (tmp == '\r')
+			continue;
+		else if (tmp == '\n')
+			break;
 
-    buffer[i] = tmp;
+		buffer[i] = tmp;
+		size += read;
+	}
 
-    size += read;
-  }
-
-  buffer[size] = '\0';
-  destination = string(buffer);
-
-  return size;
+	buffer[size] = '\0';
+	destination = string(buffer);
+	return size;
 }
 
 size_t Network::sendCommand(const string& format, ...) {
-  va_list vargs;
-  char buffer[kMinBufferSize];
-  size_t result = 0, length = 0;
+	va_list vargs;
+	char buffer[kMinBufferSize];
+	size_t result = 0, length = 0;
+	va_start(vargs, format);
 
-  va_start(vargs, format);
+	if (vsprintf(buffer, format.c_str(), vargs) < 0)
+		return -1;
 
-  if (vsprintf(buffer, format.c_str(), vargs) < 0)
-    return -1;
+	va_end(vargs);
+	length = strlen(buffer);
 
-  va_end(vargs);
+	if (!strstr(buffer, "\r\n")) {
+		strcpy(&buffer[length], "\r\n");
+		length += 2;
+	}
 
-  length = strlen(buffer);
-
-  if (!strstr(buffer, "\r\n")) {
-    strcpy(&buffer[length], "\r\n");
-    length += 2;
-  }
-
-  result = sendData(buffer, length);
-
-  return result;
+	result = sendData(buffer, length);
+	return result;
 }
 
 size_t Network::sendData(const char* data, size_t length) {
-  int size = 0;
-
-  size = ::send(m_socket, data, length, 0);
-
-  return size;
+	int size = 0;
+	size = ::send(m_socket, data, length, 0);
+	return size;
 }
 
 void Network::disconnect() {
-  ::close(m_socket);
-  m_socket = 0;
+	::close(m_socket);
+	m_socket = 0;
 }
 
 User* Network::getUserByNick(const string& nick) {
-  UserTable::iterator it;
+	UserTable::iterator it;
 
-  for (it = m_users.begin(); it < m_users.end(); it++) {
-    if ((*it)->getNick() == nick)
-      return *it;
-  }
+	for (it = m_users.begin(); it < m_users.end(); it++) {
+		if ((*it)->getNick() == nick)
+			return *it;
+	}
 
-  return 0;
+	return 0;
 }
 
 Channel* Network::getChannelByName(const string& name) {
-  ChannelTable::iterator it;
+	ChannelTable::iterator it;
 
-  for (it = m_channels.begin(); it < m_channels.end(); it++) {
-    if (((Channel*)*it)->getName() == name)
-      return *it;
-  }
+	for (it = m_channels.begin(); it < m_channels.end(); it++) {
+		if (((Channel*)*it)->getName() == name)
+			return *it;
+	}
 
-  return 0;
+	return 0;
 }
 
 void Network::delUser(User* user) {
-  UserTable::iterator it;
+	UserTable::iterator it;
 
-  for (it = m_users.begin(); it < m_users.end(); it++) {
-    if (*it == user) {
-      m_users.erase(it);
-      delete user;
-    }
-  }
+	for (it = m_users.begin(); it < m_users.end(); it++) {
+		if (*it == user) {
+			m_users.erase(it);
+			delete user;
+		}
+	}
 }
 
 void Network::delChannel(Channel* channel) {
-  ChannelTable::iterator it;
+	ChannelTable::iterator it;
 
-  for (it = m_channels.begin(); it < m_channels.end(); it++) {
-    if (*it == channel) {
-      m_channels.erase(it);
-      delete channel;
-    }
-  }
+	for (it = m_channels.begin(); it < m_channels.end(); it++) {
+		if (*it == channel) {
+			m_channels.erase(it);
+			delete channel;
+		}
+	}
 }
 
 } // namespace perlite

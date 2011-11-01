@@ -1,19 +1,23 @@
+#include <iostream>
+
+#include "Perlite.hpp"
 #include "ISupport.hpp"
+
+using namespace std;
 
 namespace perlite {
 
 ISupport::ISupport() {
-  // …
+	// …
 }
 
-string& ISupport::setValue(const string& key, const string& value) {
-  m_params[key] = value;
+void ISupport::merge(const ParamTable& parameters) {
+	ParamTable test = parameters;
+	ParamTable::iterator it;
 
-  return value;
-}
-
-string& ISupport::getValue(const string& key) {
-  return m_params[key];
+	for (it = test.begin(); it < test.end(); it++) {
+		cout << *it << endl << endl;
+	}
 }
 
 }

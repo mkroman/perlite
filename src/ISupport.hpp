@@ -5,15 +5,15 @@
 #include "Perlite.hpp"
 
 namespace perlite {
-  
+
 class ISupport {
- public:
-  ISupport();
+public:
+	ISupport();
 
-  std::string& merge(Command* command);
+	void merge(const ParamTable& parameters);
 
- private:
-  std::map<std::string, std::string> m_params;
+private:
+	std::map<std::string, std::string> m_params;
 };
 
 } // namespace perlite
