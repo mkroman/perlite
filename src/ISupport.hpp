@@ -11,6 +11,8 @@ public:
 	ISupport();
 
 	void merge(const ParamTable& parameters);
+	bool hasParameter(const std::string& name);
+	const std::string& getValue(const std::string& name);
 
 private:
 	std::map<std::string, std::string> m_params;

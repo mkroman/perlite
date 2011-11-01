@@ -14,4 +14,4 @@ clean:
 	-rm -f $(OBJECTS) $(OBJECTS) $(EXECUTABLE)
 
 .cpp.o:
-	$(CXX) -c $< $(CXXFLAGS) $(LDFLAGS) -o $@
+	$(CXX) -std=c++98 -c $< $(CXXFLAGS) $(LDFLAGS) -o $@

@@ -105,6 +105,10 @@ void Client::cmdISupportReply(Network* network, Command* command) {
 		parameters.erase(parameters.begin());
 		network->getISupport().merge(parameters);
 	}
+
+	if (network->getISupport().hasParameter("PREFIX")) {
+		cout << "Prefix has been supplied." << endl;
+	}
 }
 
 void Client::cmdPrivateMessage(Network* network, Command* command) {
@@ -200,8 +204,7 @@ void Client::cmdQuit(Network* network, Command* command) {
 
 	for (it = network->getUsers().begin(); it < network->getUsers().end(); it++) {
 		if ((*it)->getNick() == command->getNick()) {
-			for (cit = (*it)->getChannels().begin(); cit < (*it)->getChannels().end()
-			        ; cit++) {
+			for (cit = (*it)->getChannels().begin(); cit < (*it)->getChannels().end(); cit++) {
 				(*cit)->delUserRef(*it);
 			}
 
